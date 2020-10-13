@@ -36,49 +36,69 @@ d3.csv("/assets/data/data.csv").then(function(hData) {
         data.poverty = +data.poverty;
     });
 
-// 6. Create scale functions
-var xLinearScale = d3.scaleLinear()
+    // 6. Create scale functions
+    var xLinearScale = d3.scaleLinear()
     //.domain([8, d3.max(hData, d => d.poverty)])
-    .domain([8, 22])
-    .range([0, chartWidth]);
+        .domain([8, 22])
+        .range([0, chartWidth]);
 
-var yLinearScale = d3.scaleLinear()
-    .domain([0, d3.max(hData, d => d.healthcare)])
-    .range([chartHeight, 0]);
+    var yLinearScale = d3.scaleLinear()
+        .domain([0, d3.max(hData, d => d.healthcare)])
+        .range([chartHeight, 0]);
 
-// 7. Create Axis functions
+    // 7. Create Axis functions
 
-    var bottomAxis = d3.axisBottom(xLinearScale);
-    var leftAxis = d3.axisLeft(yLinearScale);
+        var bottomAxis = d3.axisBottom(xLinearScale);
+        var leftAxis = d3.axisLeft(yLinearScale);
 
     //yLinearScale xLinearScale
 
-// 8. Append axes to chart
-chartGroup.append("g")
-    .attr("transform", `translate(0, ${chartHeight})`)
-    .call(bottomAxis);
+    // 8. Append axes to chart
+    chartGroup.append("g")
+        .attr("transform", `translate(0, ${chartHeight})`)
+        .call(bottomAxis);
 
-chartGroup.append("g")
-    .call(leftAxis);
+    chartGroup.append("g")
+        .call(leftAxis);
 
-// 9. Create circles for scatterplot
-var circlesGroup = chartGroup.selectAll("circle")
-    .data(hData)
-    .enter()
-    .append("circle")
-    .attr("cx", d => xLinearScale(d.poverty))
-    .attr("cy", d => yLinearScale(d.healthcare))
-    .attr("r", "15")
-    .attr("fill", "grey")
-    //.text(textEl)
+    // 9. Create circles for scatterplot
+    var circlesGroup = chartGroup.selectAll("circle")
+        .data(hData)
+        .enter()
+        .append("circle")
+        .attr("cx", d => xLinearScale(d.poverty))
+        .attr("cy", d => yLinearScale(d.healthcare))
+        .attr("r", "15")
+        .attr("fill", "grey");
+        //.text(textEl)
 
-//var textEl = circlesGroup.append('text')
-    //.text(d => d.abbr)
-    //.attr('dx', d => xLinearScale(d.poverty))
-    //.attr('dy', d => yLinearScale(d.healthcare))
-    //.classed("txt", true)
+    // 10. Create and append text
 
-// 10. Create axes labels
+    //var textEl = circlesGroup.append('text')
+        //.text(d => d.abbr)
+        //.attr('dx', d => xLinearScale(d.poverty))
+        //.attr('dy', d => yLinearScale(d.healthcare))
+        //.classed("txt", true)
+        //.attr("font-color", "white")
+
+    // 11. Initialze and create tool tip and mouseover and mouseout event listeners
+    var toolTip = d3.tip()
+        .attr("class", "tooltip")
+        .offset([80, -60])
+        .html(function(d) {
+            return (`${d.state}<br>Poverty Rate: ${d.poverty}<br>Healthcare: ${d.healthcare}`);
+        });
+
+    chartGroup.call(toolTip);
+
+    circlesGroup.on("click", function(data) {
+        toolTip.show(data,this);
+    }).on("mouseout", function(data, index) {
+        toolTip.hide(data);
+    });
+
+
+    // 12. Create axes labels
     chartGroup.append("text")
       .attr("transform", "rotate(-90)")
       .attr("y", 0 - chartMargin.left)
@@ -91,7 +111,9 @@ var circlesGroup = chartGroup.selectAll("circle")
       .attr("transform", `translate(${chartWidth / 2}, ${chartHeight + chartMargin.top + 30})`)
       .attr("class", "axisText")
       .text("In Poverty (%)");
-  });
+    }).catch(function(error) {
+        console.log(error);
+    })
 
 
 
